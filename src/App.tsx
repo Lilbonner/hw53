@@ -1,35 +1,52 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-import './App.css'
+import React, {useState} from 'react';
+import AddTaskForm from './addTaskForm';
+import Task from './task';
+import './App.css';
 
-function App() {
-  const [count, setCount] = useState(0)
-
-  return (
-    <>
-      <div>
-        <a href="https://vitejs.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-      </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.tsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
-    </>
-  )
+interface Task {
+  id: string;
+  text: string;
 }
 
-export default App
+function App() {
+  const [tasks, setTasks] = useState<Task[]>([
+    {id: '1', text: 'Make a home work'},
+    {id: '2', text: 'Go to the store'},
+  ]);
+  const [currentTask, setCurrentTask] = useState('');
+
+  const addTask = () => {
+    if (currentTask.trim() === '') return;
+
+    const newTask: Task = {id: Date.now().toString(), text: currentTask};
+    setTasks([...tasks, newTask]);
+    setCurrentTask('');
+  };
+
+  const deleteTask = (taskId: string) => {
+    const updatedTasks = tasks.filter((task) => task.id !== taskId);
+    setTasks(updatedTasks);
+  };
+
+  let taskList: React.ReactNode = null;
+
+  if (tasks.length > 0) {
+    taskList = tasks.map((task) => (
+      <Task key={task.id} task={task} onDeleteTask={() => deleteTask(task.id)}/>
+    ));
+  }
+
+  return (
+    <div>
+      <h1>ToDo List</h1>
+      <AddTaskForm
+        onAddTask={addTask}
+        onTextChange={(e) => setCurrentTask(e.target.value)}
+        currentTask={currentTask}
+      />
+      {taskList}
+    </div>
+  );
+}
+
+export default App;
